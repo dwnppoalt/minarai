@@ -16,7 +16,7 @@ Invite the bot to your own server [using this link.](https://discord.com/api/oau
 
 
 ### NOTE:
-- The `?whatIs` command can only be called 2000 times / month[^0]
+- The `?whatIs` command can only be called 2000 times / month. When it reached it's limit, the bot will automatically switch to demo API.[^0]
 - The bot will be offline every last week of the month.[^1]
 
 
