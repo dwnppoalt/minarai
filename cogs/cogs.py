@@ -1,38 +1,42 @@
 import discord
 from discord.ext import commands
 from cogs.apis import wikipedia, wolfram
-from tinq import Tinq
 
 class HelpDropdown(discord.ui.Select):
     def __init__(self):
         options = [
             discord.SelectOption(
-                label="wikiFromQuery",
+                label="searchWikiQuery",
                 description="Wikipedia from query",
-                value="wikiFromQuery"
+                value="searchWikiQuery"
             ),
             discord.SelectOption(
-                label="wikiFromID",
+                label="searchWikiID",
                 description="Wikipedia from Page ID",
-                value="wikiFromID"
+                value="searchWikiID"
             ),
             discord.SelectOption(
                 label="whatIs",
                 description="What is...",
                 value="whatIs"
             ),
+            discord.SelectOption(
+                label="dlWikiPDF",
+                description='Download Wikipedia in PDF',
+                value="dlWikiPDF"
+            )
         ]
         super().__init__(placeholder='...', min_values=1, max_values=1, options=options)
     
     async def callback(self, interaction: discord.Interaction):
         sent = False
-        if self.values[0] == "wikiFromQuery":
+        if self.values[0] == "searchWikiQuery":
             embed = discord.Embed(title="Wikipedia from query", description="Enter a query to get a Wikipedia article")
             embed.add_field(name="How to use:", value="Add the query after the command.", inline=False)
             embed.add_field(name="Example command:", value="`?wikiFromQuery The Hitchhiker's Guide to the Galaxy`", inline=False)
             embed.add_field(name="Response:", value="The Hitchhiker's Guide to the Galaxy is a comedy science fiction franchise created by Douglas Adams.", inline=False)
             await interaction.response.edit_message(embed=embed)
-        elif self.values[0] == "wikiFromID":
+        elif self.values[0] == "searchWikiID":
             embed = discord.Embed(title="Wikipedia from Page ID", description="Enter a Page ID to get a Wikipedia article")
             embed.add_field(name="How to use:", value="Add the Page ID after the command.", inline=False)
             embed.add_field(name="Example", value="`?wikiFromPage 5472903`", inline=False)
@@ -43,6 +47,12 @@ class HelpDropdown(discord.ui.Select):
             embed.add_field(name="How to use:", value="Add the query after the command.", inline=False)
             embed.add_field(name="Example", value="`?whatIs the area of circle`", inline=False)
             embed.add_field(name="Response:", value="The area of a circle is πr^2.", inline=False)
+            await interaction.response.edit_message(embed=embed)
+        elif self.values[0] == "dlWikiPDF":
+            embed = discord.Embed(title="Download Wikipedia in PDF", description="Returns a link that redirects you to a direct download link to the Wikipedia article.")
+            embed.add_field(name="How to use:", value="Add the query after the command.", inline=False)
+            embed.add_field(name="Example", value="`?dlWikiPDF The Hitchhiker's Guide to the Galaxy`", inline=False)
+            embed.add_field(name="Response:", value="https://tinyurl.com/xxxxxxxx", inline=False)
             await interaction.response.edit_message(embed=embed)
 
 class HelpView(discord.ui.View):
@@ -69,7 +79,7 @@ class wikiPageEngine(discord.ui.View):
             item.disabled = True
         await self.message.edit(view=self)
     @discord.ui.button(label="Previous Page", style=discord.ButtonStyle.green, emoji="⬅")
-    async def previous_page(self, interaction:discord.ui.Button,button:discord.Interaction):
+    async def previous_page(self, button:discord.ui.Button,interaction:discord.Interaction):
         if not self.page - 1 == 0:
             self.page -= 1
             new_embed = discord.Embed(title=self.title, color=0xFFFFFF)
@@ -82,7 +92,7 @@ class wikiPageEngine(discord.ui.View):
     
 
     @discord.ui.button(label='Next Page', style=discord.ButtonStyle.green, emoji='➡')
-    async def next_page(self,interaction:discord.ui.Button,button:discord.Interaction):
+    async def next_page(self, button:discord.ui.Button,interaction:discord.Interaction):
         self.page += 1
 
         
@@ -108,7 +118,7 @@ class wolframPageEngine(discord.ui.View):
             item.disabled = True
         await self.message.edit(view=self)
     @discord.ui.button(label="Previous Subpod", style=discord.ButtonStyle.green, emoji="⬅")
-    async def previous_page(self, interaction:discord.ui.Button,button:discord.Interaction):
+    async def previous_page(self, button:discord.ui.Button,interaction:discord.Interaction):
         if not self.page - 1 == 0:
             self.page -= 1
             embed = discord.Embed(title=self.results[self.page - 1].get('dataType'), color=0xFFFFFF)
@@ -119,7 +129,7 @@ class wolframPageEngine(discord.ui.View):
             await interaction.response.send_message('You are on the first subpod.', ephemeral=True)
     
     @discord.ui.button(label='Next Subpod', style=discord.ButtonStyle.green, emoji='➡')
-    async def next_page(self,interaction:discord.ui.Button,button:discord.Interaction):
+    async def next_page(self, button:discord.ui.Button,interaction:discord.Interaction):
         self.page += 1
         if self.page - 1 != len(self.results):
             embed = discord.Embed(title=self.results[self.page - 1].get('dataType'), color=0xFFFFFF)
@@ -136,11 +146,10 @@ class MainCogs(commands.Cog):
         self.wiki = wikipedia.Wikipedia()
         self.wolfram = wolfram.Wolfram()
         self.wolframCalls = 0
-        self.tinq = Tinq(api_key="key-8c91a43e-bfa9-4491-8a07-23834efb3482-62e4e7fee88df")
     
     
     @commands.command()
-    async def wikiFromQuery(self, ctx, *, query):
+    async def searchWikiQuery(self, ctx, *, query):
         obj = list(self.wiki.fromQuery(query))
         page = 1
         embed = discord.Embed(title="Search Results")
@@ -151,13 +160,13 @@ class MainCogs(commands.Cog):
         view.message = await ctx.send(embed=embed, view=view)
     
     @commands.command()
-    async def wikiDLPDF(self, ctx, *, query):
+    async def dlWikiPDF(self, ctx, *, query):
         ddl = self.wiki.dlPDF(query)
         embed = discord.Embed(title="Download PDF: {}".format(query))
         embed.add_field(name="Download here", value=f"[Direct Download Link]({ddl})", inline=False)
         await ctx.send(embed=embed)
     @commands.command()
-    async def wikiFromID(self, ctx, *, id):
+    async def searchWikiID(self, ctx, *, id):
         obj = list(self.wiki.fromPageID(id))[0]
         embed = discord.Embed(title=obj.get("title"), url="https://en.wikipedia.org/wiki/{}".format(obj.get("title").replace(" ", "_")))
         embed.set_thumbnail(url=obj.get("thumbnail"))
@@ -182,10 +191,18 @@ class MainCogs(commands.Cog):
         view = wolframPageEngine(results=pods, page=1)
         view.message = await ctx.send(view=view, embed=embed)
     
+
     @commands.command()
     async def help(self, ctx):
         view = HelpView()
         view.message = await ctx.send("Select a command:", view=view)
+    
+    @commands.command()
+    async def credits(self, ctx):
+        embed = discord.Embed(title="Credits")
+        embed.add_field(name="Created by: ", value="[dwnppo#8736](https://discord.com/users/897656082313383968)", inline=False)
+        embed.add_field(name="Source code: ", value="[GitHub page](https://github.com/dwnppoalt/pyStudy)", inline=False)
+        await ctx.send(embed=embed)
 
     async def setup(self, bot):
         await bot.add_cog(MainCogs(bot))
