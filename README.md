@@ -2,7 +2,7 @@
 
 
 ### Invite Link
-Invite the bot to your own server [using this link.](https://discord.com/api/oauth2/authorize?client_id=1002716114922516551&permissions=256064&scope=bot)
+Directly message me in [discord](https://discord.com/users/897656082313383968) to ask for permission, and I will send you the invite link. 
 
 
 #### NOTE:
