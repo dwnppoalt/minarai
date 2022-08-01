@@ -1,4 +1,6 @@
 requests
-git+https://github.com/Rapptz/discord.py
 pyshorteners
 urllib3
+py-cord[voice]
+fastpunct
+youtube-dl
