@@ -2,5 +2,4 @@ requests
 pyshorteners
 urllib3
 py-cord[voice]
-fastpunct
 youtube-dl
