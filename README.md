@@ -1,4 +1,4 @@
-<h1 align="center"><img src="https://cdn.discordapp.com/attachments/965770037292044398/1003552467088330792/minarai_transparent_bg.png"></h1>
+<h1 align="center"><img src="https://cdn.discordapp.com/attachments/965770037292044398/1003639890103238746/minarai-desc.png"></h1>
 
 
 ### Invite Link
