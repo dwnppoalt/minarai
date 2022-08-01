@@ -1,4 +1,4 @@
-# MiRANAi
+# MiNARAi
 A Discord bot used to help students in their schoolworks using [Wikipedia](https://en.wikipedia.org/api/rest_v1) and [Wolfram|Alpha's REST API.](https://products.wolframalpha.com/api/pricing/)
 
 ## Available Commands
