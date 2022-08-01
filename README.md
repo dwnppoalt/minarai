@@ -1,3 +1,5 @@
+<h1 align="center"><img src="https://cdn.discordapp.com/attachments/965770037292044398/1003552467088330792/minarai_transparent_bg.png"></h1>
+
 # minarai
 
 a Discord bot used to help students increase their productivity.
