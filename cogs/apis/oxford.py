@@ -1,12 +1,12 @@
 import requests
-
+import os
 class OxfordDictionaries:
     def __init__(self) -> None:
         self.BASE_API = "https://od-api.oxforddictionaries.com/api/v2/"
-        self.APP_ID = "c83e9d4f"
-        self.API_KEY = "9ee7a221528ed8e31f0d6b3c1a902016"
+        self.APP_ID = os.getenv("OXFORD_APP_ID")
+        self.API_KEY = os.getenv("OXFORD_API_KEY")
     
-    def get_word_definition(self, word: str) -> str:
+    def dictionary(self, word):
         url = self.BASE_API + "entries/en/" + word
         headers = {
             "Accept": "application/json",
@@ -15,16 +15,14 @@ class OxfordDictionaries:
         }
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
-            with open("oxford.json", "w", encoding='utf-8') as f:
-                f.write(response.text)
             return [
                 {
-                    'word' : i.get("id"),
                     "lexicalEntries" : [
                         {
+                            'word' : x.get("id"),
                             "entries" : [
                                 {
-                                "origin" : entries.get("etymologies"),
+                                "origin" : None if not entries.get("etymologies") else entries.get("etymologies"),
                                 "pronunciations" : [
                                     {
                                         "phoneticSpelling" : pronounciations.get("phoneticSpelling"),
@@ -49,5 +47,33 @@ class OxfordDictionaries:
         else:
             return "Word not found"
 
-ox = OxfordDictionaries()
-print(ox.get_word_definition("apprentice"))
+    def thesaurus(self, word):
+        url = self.BASE_API + "thesaurus/en/" + word
+        headers = {
+            "Accept": "application/json",
+            "app_id": self.APP_ID,
+            "app_key": self.API_KEY
+        }
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            return [
+                {
+                    "lexicalEntries" : [
+                        {
+                            "word" : x.get("text"),
+                            "entries" : [
+                                {
+                                    "senses" : [
+                                        {
+                                            "antonyms" : None if not senses.get("antonyms") else [ant.get("text") for ant in senses.get("antonyms")],
+                                            "synonyms" : None if not senses.get("synonyms") else [syn.get("text") for syn in senses.get("synonyms")]
+                                        } for senses in entries.get("senses")
+                                    ],
+                                    "lexicalCategory" : x.get("lexicalCategory").get("text"),
+                                } for entries in x.get("entries")
+                            ]
+                        } for x in i.get("lexicalEntries")
+                    ]
+                } for i in response.json().get('results')
+            ]
+

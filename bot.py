@@ -1,5 +1,6 @@
 import discord
 from cogs.cogs import MainCogs
+from cogs.musiccog import Music
 from discord.ext import commands
 import os
 TOKEN = os.environ["TOKEN"]

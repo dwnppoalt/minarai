@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
-from cogs.apis import wikipedia, wolfram
-
+from cogs.apis import wikipedia, wolfram, oxford
+import json
 class HelpDropdown(discord.ui.Select):
     def __init__(self):
         options = [
@@ -94,8 +94,6 @@ class wikiPageEngine(discord.ui.View):
     @discord.ui.button(label='Next Page', style=discord.ButtonStyle.green, emoji='➡')
     async def next_page(self, button:discord.ui.Button,interaction:discord.Interaction):
         self.page += 1
-
-        
         if self.page - 1 != len(self.results):
             
             new_embed = discord.Embed(title=self.title, color=0xFFFFFF)
@@ -105,7 +103,6 @@ class wikiPageEngine(discord.ui.View):
             await interaction.response.edit_message(view=self, embed=new_embed)
         else:
             await interaction.response.send_message('You are on the last page', ephemeral=True)
-
 
 class wolframPageEngine(discord.ui.View):
     def __init__(self, *, timeout=10, results=None, page=None):
@@ -139,13 +136,72 @@ class wolframPageEngine(discord.ui.View):
         else:
             await interaction.response.send_message('You are on the last subpod.', ephemeral=True)
 
-
+class oxfordPageEngine(discord.ui.View):
+    def __init__(self, *, timeout=10, results=None, word=None):
+        super().__init__()
+        self.timeout = timeout
+        self.results = results
+        self.word = word
+        self.page = 1
+    async def on_timeout(self) -> None:
+        for item in self.children:
+            item.disabled = True
+        await self.message.edit(view=self)
+    @discord.ui.button(label="Previous Result", style=discord.ButtonStyle.green, emoji="⬅")
+    async def previous_page(self, button:discord.ui.Button,interaction:discord.Interaction):
+        self.page -= 1
+        if self.page - 1 == 0:
+            #self.results = entry: {...}
+            #self.results =         ^^^
+            embed = discord.Embed(title=self.word, color=0xFFFFFF)
+            i = self.results.get("lexicalEntries")[self.page - 1]
+            if i.get("entries")[0].get("lexicalCategory"):
+                embed.add_field(name="Category:", value=i.get("entries")[0].get("lexicalCategory"), inline=False)
+            if i.get("pronunciations"):
+                embed.add_field(name="Pronunciation:", value=i.get("entries")[0].get("pronunciations")[0].get("phoneticSpelling") + "\n" + "[How to pronounce]({})".format(i.get("entries")[0].get("pronunciations")[0].get('audioFile')), inline=False)
+            if i.get("entries")[0].get("origin"):
+                embed.add_field(name="Origin:", value="".join(i.get("entries")[0].get("origin")), inline=False)
+            if i.get("entries")[0].get("senses")[0].get("definitions"):
+                embed.add_field(name="Definition:", value="\n".join(i.get("entries")[0].get("senses")[0].get("definitions")), inline=False)
+            if i.get("entries")[0].get("senses")[0].get("examples"):
+                embed.add_field(name="Examples:", value="\n".join(i.get("entries")[0].get("senses")[0].get("examples")), inline=False)
+            if i.get("entries")[0].get("senses")[0].get("synonyms"):
+                embed.add_field(name="Synonyms:", value="\n".join(i.get("entries")[0].get("senses")[0].get("synonyms")), inline=False)
+            if i.get("entries")[0].get("senses")[0].get("antonyms"):
+                embed.add_field(name="Antonyms:", value="\n".join(i.get("entries")[0].get("senses")[0].get("antonyms")), inline=False)
+            await interaction.response.edit_message(embed=embed)
+        else:
+            await interaction.response.send_message('You are on the first result.', ephemeral=True)
+    @discord.ui.button(label='Next Result', style=discord.ButtonStyle.green, emoji='➡')
+    async def next_page(self, button:discord.ui.Button,interaction:discord.Interaction):
+        self.page += 1
+        if self.page - 1 != len(self.results.get("lexicalEntries")):
+            embed = discord.Embed(title=self.word, color=0xFFFFFF)
+            i = self.results.get("lexicalEntries")[self.page - 1]
+            if i.get("entries")[0].get("lexicalCategory"):
+                embed.add_field(name="Category:", value=i.get("entries")[0].get("lexicalCategory"), inline=False)
+            if i.get("pronunciations"):
+                embed.add_field(name="Pronunciation:", value=i.get("entries")[0].get("pronunciations")[0].get("phoneticSpelling") + "\n" + "[How to pronounce]({})".format(i.get("entries")[0].get("pronunciations")[0].get('audioFile')), inline=False)
+            if i.get("entries")[0].get("origin"):
+                embed.add_field(name="Origin:", value="".join(i.get("entries")[0].get("origin")), inline=False)
+            if i.get("entries")[0].get("senses")[0].get("definitions"):
+                embed.add_field(name="Definition:", value="\n".join(i.get("entries")[0].get("senses")[0].get("definitions")), inline=False)
+            if i.get("entries")[0].get("senses")[0].get("examples"):
+                embed.add_field(name="Examples:", value="\n".join(i.get("entries")[0].get("senses")[0].get("examples")), inline=False)
+            if i.get("entries")[0].get("senses")[0].get("synonyms"):
+                embed.add_field(name="Synonyms:", value="\n".join(i.get("entries")[0].get("senses")[0].get("synonyms")), inline=False)
+            if i.get("entries")[0].get("senses")[0].get("antonyms"):
+                embed.add_field(name="Antonyms:", value="\n".join(i.get("entries")[0].get("senses")[0].get("antonyms")), inline=False)
+            await interaction.response.edit_message(embed=embed)
+        else:
+            await interaction.response.send_message('You are on the last result.', ephemeral=True)
 class MainCogs(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.wiki = wikipedia.Wikipedia()
         self.wolfram = wolfram.Wolfram()
         self.wolframCalls = 0
+        self.oxford = oxford.OxfordDictionaries()
     
     
     @commands.command()
@@ -203,6 +259,47 @@ class MainCogs(commands.Cog):
         embed.add_field(name="Created by: ", value="[dwnppo#8736](https://discord.com/users/897656082313383968)", inline=False)
         embed.add_field(name="Source code: ", value="[GitHub page](https://github.com/dwnppoalt/pyStudy)", inline=False)
         await ctx.send(embed=embed)
-
+    
+    @commands.command()
+    async def dictionary(self, ctx, *, query):
+        obj = self.oxford.dictionary(query)
+        embed = discord.Embed(title=query, color=0xFFFFFF)
+        i = obj[0].get("lexicalEntries")[0]
+        if i.get("entries")[0].get("lexicalCategory"):
+                embed.add_field(name="Category:", value=i.get("entries")[0].get("lexicalCategory"), inline=False)
+        if i.get("pronunciations"):
+            embed.add_field(name="Pronunciation:", value=i.get("entries")[0].get("pronunciations")[0].get("phoneticSpelling") + "\n" + "[How to pronounce]({})".format(i.get("entries")[0].get("pronunciations")[0].get('audioFile')), inline=False)
+        if i.get("entries")[0].get("origin"):
+            embed.add_field(name="Origin:", value="".join(i.get("entries")[0].get("origin")), inline=False)
+        if i.get("entries")[0].get("senses")[0].get("definitions"):
+            embed.add_field(name="Definition:", value="\n".join(i.get("entries")[0].get("senses")[0].get("definitions")), inline=False)
+        if i.get("entries")[0].get("senses")[0].get("examples"):
+            embed.add_field(name="Examples:", value="\n".join(i.get("entries")[0].get("senses")[0].get("examples")), inline=False)
+        if i.get("entries")[0].get("senses")[0].get("synonyms"):
+            embed.add_field(name="Synonyms:", value="\n".join(i.get("entries")[0].get("senses")[0].get("synonyms")), inline=False)
+        if i.get("entries")[0].get("senses")[0].get("antonyms"):
+            embed.add_field(name="Antonyms:", value="\n".join(i.get("entries")[0].get("senses")[0].get("antonyms")), inline=False)
+        if len(obj[0].get("lexicalEntries")) > 1:
+            view = oxfordPageEngine(results=obj[0], word=query)
+            view.message = await ctx.send(embed=embed, view=view)
+        else:
+            await ctx.send(embed=embed)
+    
+    @commands.command()
+    async def thesaurus(self, ctx, *, query):
+        obj = self.oxford.thesaurus(query)
+        embed = discord.Embed(title=query, color=0xFFFFFF)
+        i = obj[0].get("lexicalEntries")[0]
+        if i.get("entries")[0].get("lexicalCategory"):
+                embed.add_field(name="Category:", value=i.get("entries")[0].get("lexicalCategory"), inline=False)
+        if i.get("entries")[0].get("senses")[0].get("synonyms"):
+            embed.add_field(name="Synonyms:", value="\n".join(i.get("entries")[0].get("senses")[0].get("synonyms")), inline=False)
+        if i.get("entries")[0].get("senses")[0].get("antonyms"):
+            embed.add_field(name="Antonyms:", value="\n".join(i.get("entries")[0].get("senses")[0].get("antonyms")), inline=False)
+        if len(obj[0].get("lexicalEntries")) > 1:
+            view = oxfordPageEngine(results=obj[0], word=query)
+            view.message = await ctx.send(embed=embed, view=view)
+        else:
+            await ctx.send(embed=embed)
     async def setup(self, bot):
         await bot.add_cog(MainCogs(bot))
