@@ -24,6 +24,21 @@ class HelpDropdown(discord.ui.Select):
                 label="dlWikiPDF",
                 description='Download Wikipedia in PDF',
                 value="dlWikiPDF"
+            ),
+            discord.SelectOption(
+                label="dictionary",
+                description="Dictionary",
+                value="dictionary"
+            ),
+            discord.SelectOption(
+                label="thesaurus",
+                description="Thesaurus",
+                value="thesaurus"
+            ),
+            discord.SelectOption(
+                label="todo",
+                description="Todo",
+                value="todo"
             )
         ]
         super().__init__(placeholder='...', min_values=1, max_values=1, options=options)
@@ -53,6 +68,24 @@ class HelpDropdown(discord.ui.Select):
             embed.add_field(name="How to use:", value="Add the query after the command.", inline=False)
             embed.add_field(name="Example", value="`?dlWikiPDF The Hitchhiker's Guide to the Galaxy`", inline=False)
             embed.add_field(name="Response:", value="https://tinyurl.com/xxxxxxxx", inline=False)
+            await interaction.response.edit_message(embed=embed)
+        elif self.values[0] == "dictionary":
+            embed = discord.Embed(title="Dictionary", description="Enter a query to get a dictionary answer")
+            embed.add_field(name="How to use:", value="Add the query after the command.", inline=False)
+            embed.add_field(name="Example", value="`?dictionary apprentice`", inline=False)
+            embed.add_field(name="Response:", value="The word 'apprentice' is a noun.", inline=False)
+            await interaction.response.edit_message(embed=embed)
+        elif self.values[0] == "thesaurus":
+            embed = discord.Embed(title="Thesaurus", description="Enter a query to get a thesaurus answer")
+            embed.add_field(name="How to use:", value="Add the query after the command.", inline=False)
+            embed.add_field(name="Example", value="`?thesaurus apprentice`", inline=False)
+            embed.add_field(name="Response:", value="Synonyms: trainee, learner", inline=False)
+            await interaction.response.edit_message(embed=embed)
+        elif self.values[0] == "todo":
+            embed = discord.Embed(title="Todo", description="Enter a query to get a todo answer")
+            embed.add_field(name="How to use:", value="Add the query after the command.", inline=False)
+            embed.add_field(name="Example", value="`?todo add drink water`", inline=False)
+            embed.add_field(name="Response:", value="Added drink water to todo list.", inline=False)
             await interaction.response.edit_message(embed=embed)
 
 class HelpView(discord.ui.View):
