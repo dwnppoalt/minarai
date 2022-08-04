@@ -1,7 +1,12 @@
 import discord
 from discord.ext import commands
-from cogs.apis import wikipedia, wolfram, oxford
+from cogs.apis import wikipedia, wolfram, oxford, bookdl
 import json
+import pyshorteners
+
+def split_chunks(l, n):
+    for i in range(0, len(l), n): 
+        yield l[i:i + n]
 class HelpDropdown(discord.ui.Select):
     def __init__(self):
         options = [
@@ -97,7 +102,39 @@ class HelpView(discord.ui.View):
     async def on_timeout(self) -> None:
         await self.message.edit(view=None)
 
-
+class bookPageEngine(discord.ui.View):
+    def __init__(self, *, timeout=10, results=None, query=None):
+        super().__init__(timeout=timeout)
+        self.results = results
+        self.timeout = timeout
+        self.page = 1
+        self.query = query
+    async def on_timeout(self) -> None:
+        for item in self.children:
+            item.disabled = True
+        await self.message.edit(view=self)
+    
+    @discord.ui.button(label="Previous Page", style=discord.ButtonStyle.green, emoji="⬅")
+    async def previous_page(self, button:discord.ui.Button,interaction:discord.Interaction):
+        if not self.page - 1 == 0:
+            self.page -= 1
+            embed = discord.Embed(title="Search results for: {}".format(self.query), color=0xFFFFFF)
+            for i in self.results[self.page - 1]:
+                embed.add_field(name=i.get("Title"), value="Author: **`{}`**\nLanguage: **`{}`**\n Pages: **`{}`**\nFile Extension: **`{}`**\nMD5 Hash: **`{}`**".format(i.get("Author"), i.get("Language"), i.get("Pages"),i.get("Extension"), i.get("Mirror_1").split("/")[-1]), inline=False)
+            await interaction.response.edit_message(embed=embed)
+        else:
+            await interaction.response.send_message('You are on the first page.', ephemeral=True)
+    
+    @discord.ui.button(label='Next Page', style=discord.ButtonStyle.green, emoji='➡')
+    async def next_page(self, button:discord.ui.Button,interaction:discord.Interaction):
+        self.page += 1
+        if self.page - 1 != len(self.results):
+            embed = discord.Embed(title="Search results for: {}".format(self.query), color=0xFFFFFF)
+            for i in self.results[self.page - 1]:
+                embed.add_field(name=i.get("Title"), value="Author: **`{}`**\nLanguage: **`{}`**\n Pages: **`{}`**\nFile Extension: **`{}`**\nMD5 Hash: **`{}`**".format(i.get("Author"), i.get("Language"), i.get("Pages"),i.get("Extension"), i.get("Mirror_1").split("/")[-1]), inline=False)
+            await interaction.response.edit_message(embed=embed)
+        else:
+            await interaction.response.send_message('You are on the last page.', ephemeral=True)
 class wikiPageEngine(discord.ui.View):
     def __init__(self, *, timeout=10, results=None, page=None, title=None, type=None):
         super().__init__()
@@ -235,8 +272,8 @@ class MainCogs(commands.Cog):
         self.wolfram = wolfram.Wolfram()
         self.wolframCalls = 0
         self.oxford = oxford.OxfordDictionaries()
-    
-    
+        self.books = bookdl.Books()
+        self.shorten = pyshorteners.Shortener()
     @commands.command()
     async def searchWikiQuery(self, ctx, *, query):
         obj = list(self.wiki.fromQuery(query))
@@ -336,3 +373,42 @@ class MainCogs(commands.Cog):
             await ctx.send(embed=embed)
     async def setup(self, bot):
         await bot.add_cog(MainCogs(bot))
+    
+    @commands.command()
+    async def book(self, ctx, action, *, query=None):
+        aliases = {
+            "search" : ["search", "s"],
+            "download" : ["download", "d", "dl"],
+        }
+        if action in aliases.get("search"):
+            obj = list(split_chunks(self.books.get_book(query), 5))
+            embed = discord.Embed(title="Search results for: {}".format(query), color=0xFFFFFF)
+            for i in obj[0]:
+                embed.add_field(name=i.get("Title"), value="Author: **`{}`**\nLanguage: **`{}`**\n Pages: **`{}`**\nFile Extension: **`{}`**\nMD5 Hash: **`{}`**".format(i.get("Author"), i.get("Language"), i.get("Pages"),i.get("Extension"), i.get("Mirror_1").split("/")[-1]), inline=False)
+            if len(obj) == 1:
+                await ctx.send(embed=embed)
+            else:
+                view = bookPageEngine(results=obj, query=query)
+                view.message = await ctx.send(embed=embed, view=view)
+        elif action in aliases.get("download"):
+            obj = self.books.download(query)
+            if not obj:
+                await ctx.send("Book not found.")
+            else:
+                if not query:
+                    await ctx.send("Please specify a book.")
+                else:
+                    embed = discord.Embed(title=obj.get("Title"), color=0xFFFFFF)
+                    GET = self.shorten.tinyurl.short(obj.get("GET"))
+                    CLOUDFLARE = self.shorten.tinyurl.short(obj.get("Cloudflare"))
+                    IPFSIO = self.shorten.tinyurl.short(obj.get("IPFS.io"))
+                    INFURA = self.shorten.tinyurl.short(obj.get("Infura"))
+                    embed.set_thumbnail(url=obj.get("Image"))
+                    embed.add_field(name="Mirror 1", value=GET, inline=False)
+                    embed.add_field(name="Mirror 2", value=CLOUDFLARE, inline=False)
+                    embed.add_field(name="Mirror 3", value=IPFSIO, inline=False)
+                    embed.add_field(name="Mirror 4", value=INFURA, inline=False)
+                    await ctx.send(embed=embed)
+        else:
+            await ctx.send("Invalid action. Accepted actions: `search` and `download`.")
+
