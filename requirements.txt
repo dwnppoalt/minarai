@@ -3,3 +3,4 @@ pyshorteners
 urllib3
 py-cord[voice]
 youtube-dl
+beautifulsoup4
