@@ -53,46 +53,53 @@ class HelpDropdown(discord.ui.Select):
         if self.values[0] == "searchWikiQuery":
             embed = discord.Embed(title="Wikipedia from query", description="Enter a query to get a Wikipedia article")
             embed.add_field(name="How to use:", value="Add the query after the command.", inline=False)
-            embed.add_field(name="Example command:", value="`?wikiFromQuery The Hitchhiker's Guide to the Galaxy`", inline=False)
+            embed.add_field(name="Example command:", value="`>wikiFromQuery The Hitchhiker's Guide to the Galaxy`", inline=False)
             embed.add_field(name="Response:", value="The Hitchhiker's Guide to the Galaxy is a comedy science fiction franchise created by Douglas Adams.", inline=False)
             await interaction.response.edit_message(embed=embed)
         elif self.values[0] == "searchWikiID":
             embed = discord.Embed(title="Wikipedia from Page ID", description="Enter a Page ID to get a Wikipedia article")
             embed.add_field(name="How to use:", value="Add the Page ID after the command.", inline=False)
-            embed.add_field(name="Example", value="`?wikiFromPage 5472903`", inline=False)
+            embed.add_field(name="Example", value="`>wikiFromPage 5472903`", inline=False)
             embed.add_field(name="Response:", value="'Never Gonna Give You Up'is the debut single recorded by English singer and songwriter Rick Astley, released on 27 July 1987.", inline=False)
             await interaction.response.edit_message(embed=embed)
         elif self.values[0] == "whatIs":
             embed = discord.Embed(title="What is...", description="Enter a query to get a Wolfram Alpha answer")
             embed.add_field(name="How to use:", value="Add the query after the command.", inline=False)
-            embed.add_field(name="Example", value="`?whatIs the area of circle`", inline=False)
+            embed.add_field(name="Example", value="`>whatIs the area of circle`", inline=False)
             embed.add_field(name="Response:", value="The area of a circle is πr^2.", inline=False)
             await interaction.response.edit_message(embed=embed)
         elif self.values[0] == "dlWikiPDF":
             embed = discord.Embed(title="Download Wikipedia in PDF", description="Returns a link that redirects you to a direct download link to the Wikipedia article.")
             embed.add_field(name="How to use:", value="Add the query after the command.", inline=False)
-            embed.add_field(name="Example", value="`?dlWikiPDF The Hitchhiker's Guide to the Galaxy`", inline=False)
+            embed.add_field(name="Example", value="`>dlWikiPDF The Hitchhiker's Guide to the Galaxy`", inline=False)
             embed.add_field(name="Response:", value="https://tinyurl.com/xxxxxxxx", inline=False)
             await interaction.response.edit_message(embed=embed)
         elif self.values[0] == "dictionary":
             embed = discord.Embed(title="Dictionary", description="Enter a query to get a dictionary answer")
             embed.add_field(name="How to use:", value="Add the query after the command.", inline=False)
-            embed.add_field(name="Example", value="`?dictionary apprentice`", inline=False)
+            embed.add_field(name="Example", value="`>dictionary apprentice`", inline=False)
             embed.add_field(name="Response:", value="The word 'apprentice' is a noun.", inline=False)
             await interaction.response.edit_message(embed=embed)
         elif self.values[0] == "thesaurus":
             embed = discord.Embed(title="Thesaurus", description="Enter a query to get a thesaurus answer")
             embed.add_field(name="How to use:", value="Add the query after the command.", inline=False)
-            embed.add_field(name="Example", value="`?thesaurus apprentice`", inline=False)
+            embed.add_field(name="Example", value="`>thesaurus apprentice`", inline=False)
             embed.add_field(name="Response:", value="Synonyms: trainee, learner", inline=False)
             await interaction.response.edit_message(embed=embed)
         elif self.values[0] == "todo":
             embed = discord.Embed(title="Todo", description="Enter a query to get a todo answer")
             embed.add_field(name="How to use:", value="Add the query after the command.", inline=False)
-            embed.add_field(name="Example", value="`?todo add drink water`", inline=False)
+            embed.add_field(name="Actions: ", value="`add: [add, a, +]\nremove: [remove, rm, r, del, delete]\nclear: [clear, clr, c]`")
+            embed.add_field(name="Example", value="`>todo add drink water`", inline=False)
             embed.add_field(name="Response:", value="Added drink water to todo list.", inline=False)
             await interaction.response.edit_message(embed=embed)
-
+        elif self.values[0] == "book":
+            embed = discord.Embed(title="Book", description="Enter a query to download a book")
+            embed.add_field(name="How to use:", value="Add the query after the command.", inline=False)
+            embed.add_field(name="Actions: ", value="`search: [search, s]\ndownload: [download, dl]`")
+            embed.add_field(name="Example", value="`>book search The Hitchhiker's Guide to the Galaxy`", inline=False)
+            embed.add_field(name="Response:", value="The Hitchhiker's Guide to the Galaxy is a comedy science fiction franchise created by Douglas Adams.", inline=False)
+            await interaction.response.edit_message(embed=embed)
 class HelpView(discord.ui.View):
     def __init__(self, *, timeout=10):
         super().__init__(timeout=timeout)
