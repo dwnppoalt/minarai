@@ -4,3 +4,4 @@ urllib3
 py-cord[voice]
 youtube-dl
 beautifulsoup4
+lxml
