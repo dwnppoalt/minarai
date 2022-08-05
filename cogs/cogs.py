@@ -110,12 +110,13 @@ class HelpView(discord.ui.View):
         await self.message.edit(view=None)
 
 class bookPageEngine(discord.ui.View):
-    def __init__(self, *, timeout=10, results=None, query=None):
+    def __init__(self, *, timeout=10, results=None, query=None, fiction=False):
         super().__init__(timeout=timeout)
         self.results = results
         self.timeout = timeout
         self.page = 1
         self.query = query
+        self.fiction = fiction
     async def on_timeout(self) -> None:
         for item in self.children:
             item.disabled = True
@@ -126,8 +127,12 @@ class bookPageEngine(discord.ui.View):
         if not self.page - 1 == 0:
             self.page -= 1
             embed = discord.Embed(title="Search results for: {}".format(self.query), color=0xFFFFFF)
-            for i in self.results[self.page - 1]:
-                embed.add_field(name=i.get("Title"), value="Author: **`{}`**\nLanguage: **`{}`**\n Pages: **`{}`**\nFile Extension: **`{}`**\nMD5 Hash: **`{}`**".format(i.get("Author"), i.get("Language"), i.get("Pages"),i.get("Extension"), i.get("Mirror_1").split("/")[-1]), inline=False)
+            if not self.fiction:
+                for i in self.results[self.page - 1]:
+                    embed.add_field(name=i.get("Title"), value="Author: **`{}`**\nLanguage: **`{}`**\n File Extension: **`{}`**\nMD5 Hash: **`{}`**".format(i.get("Author"), i.get("Language"),i.get("Extension"), i.get("Mirror_1").split("/")[-1]), inline=False)
+            else:
+                for i in self.results[self.page - 1]:
+                    embed.add_field(name=i.get("Title"), value="Author: **`{}`**\nLanguage: **`{}`**\n File Extension: **`{}`**\nMD5 Hash: **`{}`**".format(i.get("Author"), i.get("Language"),i.get("Extension"), i.get("Mirrors")[0].split("/")[-1]), inline=False)
             await interaction.response.edit_message(embed=embed)
         else:
             await interaction.response.send_message('You are on the first page.', ephemeral=True)
@@ -137,8 +142,12 @@ class bookPageEngine(discord.ui.View):
         self.page += 1
         if self.page - 1 != len(self.results):
             embed = discord.Embed(title="Search results for: {}".format(self.query), color=0xFFFFFF)
-            for i in self.results[self.page - 1]:
-                embed.add_field(name=i.get("Title"), value="Author: **`{}`**\nLanguage: **`{}`**\n Pages: **`{}`**\nFile Extension: **`{}`**\nMD5 Hash: **`{}`**".format(i.get("Author"), i.get("Language"), i.get("Pages"),i.get("Extension"), i.get("Mirror_1").split("/")[-1]), inline=False)
+            if not self.fiction:
+                for i in self.results[self.page - 1]:
+                    embed.add_field(name=i.get("Title"), value="Author: **`{}`**\nLanguage: **`{}`**\n File Extension: **`{}`**\nMD5 Hash: **`{}`**".format(i.get("Author"), i.get("Language"),i.get("Extension"), i.get("Mirror_1").split("/")[-1]), inline=False)
+            else:
+                for i in self.results[self.page - 1]:
+                    embed.add_field(name=i.get("Title"), value="Author: **`{}`**\nLanguage: **`{}`**\n File Extension: **`{}`**\nMD5 Hash: **`{}`**".format(i.get("Author"), i.get("Language"),i.get("Extension"), i.get("Mirrors")[0].split("/")[-1]), inline=False)
             await interaction.response.edit_message(embed=embed)
         else:
             await interaction.response.send_message('You are on the last page.', ephemeral=True)
@@ -381,41 +390,3 @@ class MainCogs(commands.Cog):
     async def setup(self, bot):
         await bot.add_cog(MainCogs(bot))
     
-    @commands.command()
-    async def book(self, ctx, action, *, query=None):
-        aliases = {
-            "search" : ["search", "s"],
-            "download" : ["download", "d", "dl"],
-        }
-        if action in aliases.get("search"):
-            obj = list(split_chunks(self.books.get_book(query), 5))
-            embed = discord.Embed(title="Search results for: {}".format(query), color=0xFFFFFF)
-            for i in obj[0]:
-                embed.add_field(name=i.get("Title"), value="Author: **`{}`**\nLanguage: **`{}`**\n Pages: **`{}`**\nFile Extension: **`{}`**\nMD5 Hash: **`{}`**".format(i.get("Author"), i.get("Language"), i.get("Pages"),i.get("Extension"), i.get("Mirror_1").split("/")[-1]), inline=False)
-            if len(obj) == 1:
-                await ctx.send(embed=embed)
-            else:
-                view = bookPageEngine(results=obj, query=query)
-                view.message = await ctx.send(embed=embed, view=view)
-        elif action in aliases.get("download"):
-            obj = self.books.download(query)
-            if not obj:
-                await ctx.send("Book not found.")
-            else:
-                if not query:
-                    await ctx.send("Please specify a book.")
-                else:
-                    embed = discord.Embed(title=obj.get("Title"), color=0xFFFFFF)
-                    GET = self.shorten.tinyurl.short(obj.get("GET"))
-                    CLOUDFLARE = self.shorten.tinyurl.short(obj.get("Cloudflare"))
-                    IPFSIO = self.shorten.tinyurl.short(obj.get("IPFS.io"))
-                    INFURA = self.shorten.tinyurl.short(obj.get("Infura"))
-                    embed.set_thumbnail(url=obj.get("Image"))
-                    embed.add_field(name="Mirror 1", value=GET, inline=False)
-                    embed.add_field(name="Mirror 2", value=CLOUDFLARE, inline=False)
-                    embed.add_field(name="Mirror 3", value=IPFSIO, inline=False)
-                    embed.add_field(name="Mirror 4", value=INFURA, inline=False)
-                    await ctx.send(embed=embed)
-        else:
-            await ctx.send("Invalid action. Accepted actions: `search` and `download`.")
-

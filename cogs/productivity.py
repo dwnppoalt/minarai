@@ -1,5 +1,7 @@
 import asyncio
 import discord
+from io import StringIO
+import sys
 from discord.ext import commands
 
 class Productivity(commands.Cog):
@@ -49,8 +51,3 @@ class Productivity(commands.Cog):
             await ctx.send(f"```{self.to_do[serverID]}```")
         else:
             await ctx.send("Invalid action. Valid actions are: `add`, `remove`, and `clear`")
-        while self.to_do[serverID][userID] != 0:
-            await asyncio.sleep(3600)
-            for i in self.to_do[serverID]:
-                await ctx.send("You currently have {} tasks in your to-do list, {}. Run the command `>todo` to view them.".format(len(self.to_do[serverID][userID]), ctx.author.mention))
-    
