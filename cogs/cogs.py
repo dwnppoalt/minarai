@@ -288,7 +288,6 @@ class MainCogs(commands.Cog):
         self.wolfram = wolfram.Wolfram()
         self.wolframCalls = 0
         self.oxford = oxford.OxfordDictionaries()
-        self.books = bookdl.Books()
         self.shorten = pyshorteners.Shortener()
     @commands.command()
     async def searchWikiQuery(self, ctx, *, query):
