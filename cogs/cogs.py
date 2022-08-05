@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from cogs.apis import wikipedia, wolfram, oxford, bookdl
+from cogs.apis import wikipedia, wolfram, oxford
 import json
 import pyshorteners
 
