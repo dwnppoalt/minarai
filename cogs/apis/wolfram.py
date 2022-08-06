@@ -12,7 +12,7 @@ class Wolfram:
         return response
     
     def filterResults(self, query: str) -> dict:
-        query = query.replace(" ", "%20")
+        query = query.replace(" ", "%2B")
         obj = self.parseContent(query).get("queryresult")
         if obj.get('success') != True:
             raise Exception("Query failed")

@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from cogs.apis import wikipedia, wolfram, oxford
+from cogs.apis import wikipedia, wolfram, oxford, bookdl
 import json
 import pyshorteners
 
@@ -281,6 +281,7 @@ class oxfordPageEngine(discord.ui.View):
             await interaction.response.edit_message(embed=embed)
         else:
             await interaction.response.send_message('You are on the last result.', ephemeral=True)
+
 class MainCogs(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -290,31 +291,34 @@ class MainCogs(commands.Cog):
         self.oxford = oxford.OxfordDictionaries()
         self.shorten = pyshorteners.Shortener()
     @commands.command()
-    async def searchWikiQuery(self, ctx, *, query):
-        obj = list(self.wiki.fromQuery(query))
-        page = 1
-        embed = discord.Embed(title="Search Results")
-        i = obj[0]
-        embed.add_field(name=i.get('title'), value=i.get("extract"), inline=False)
-        embed.set_footer(text='Page id: {}'.format(i.get("pageid")))
-        view = wikiPageEngine(results=obj, page=page, title="Search Results")
-        view.message = await ctx.send(embed=embed, view=view)
-    
-    @commands.command()
-    async def dlWikiPDF(self, ctx, *, query):
-        ddl = self.wiki.dlPDF(query)
-        embed = discord.Embed(title="Download PDF: {}".format(query))
-        embed.add_field(name="Download here", value=f"[Direct Download Link]({ddl})", inline=False)
-        await ctx.send(embed=embed)
-    @commands.command()
-    async def searchWikiID(self, ctx, *, id):
-        obj = list(self.wiki.fromPageID(id))[0]
-        embed = discord.Embed(title=obj.get("title"), url="https://en.wikipedia.org/wiki/{}".format(obj.get("title").replace(" ", "_")))
-        embed.set_thumbnail(url=obj.get("thumbnail"))
-        embed.add_field(name="Contents: ", value=obj.get("extract"), inline=False)
-        embed.set_footer(text="Page ID: {}".format(obj.get("pageid")))
-        await ctx.send(embed=embed)
-    
+    async def wiki(self, ctx, action, *, query):
+        aliases = {
+            "search" : ['search', 's', "query", "q"],
+            "download" : ['download', 'd', "dl"],
+            "id" : ['id', 'i']
+        }
+        if action in aliases.get("search"):
+            obj = list(self.wiki.fromQuery(query))
+            page = 1
+            embed = discord.Embed(title="Search Results")
+            i = obj[0]
+            embed.add_field(name=i.get('title'), value=i.get("extract"), inline=False)
+            embed.set_footer(text='Page id: {}'.format(i.get("pageid")))
+            view = wikiPageEngine(results=obj, page=page, title="Search Results")
+            view.message = await ctx.send(embed=embed, view=view)
+        elif action in aliases.get("download"):
+            ddl = self.wiki.dlPDF(query)
+            embed = discord.Embed(title="Download PDF: {}".format(query))
+            embed.add_field(name="Download here", value=f"[Direct Download Link]({ddl})", inline=False)
+            await ctx.send(embed=embed)
+        elif action in aliases.get("id"):
+            obj = list(self.wiki.fromPageID(id))[0]
+            embed = discord.Embed(title=obj.get("title"), url="https://en.wikipedia.org/wiki/{}".format(obj.get("title").replace(" ", "_")))
+            embed.set_thumbnail(url=obj.get("thumbnail"))
+            embed.add_field(name="Contents: ", value=obj.get("extract"), inline=False)
+            embed.set_footer(text="Page ID: {}".format(obj.get("pageid")))
+            await ctx.send(embed=embed)
+
     @commands.command()
     async def whatIs(self, ctx, *, query):
         self.wolframCalls += 1
@@ -386,6 +390,7 @@ class MainCogs(commands.Cog):
             view.message = await ctx.send(embed=embed, view=view)
         else:
             await ctx.send(embed=embed)
+    
     async def setup(self, bot):
         await bot.add_cog(MainCogs(bot))
     
