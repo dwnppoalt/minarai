@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from cogs.apis import wikipedia, wolfram, oxford, bookdl
+from cogs.apis import wikipedia, wolfram, oxford
 import json
 import pyshorteners
 
@@ -391,6 +391,17 @@ class MainCogs(commands.Cog):
         else:
             await ctx.send(embed=embed)
     
+    @commands.command()
+    async def announce(self, ctx, *, message):
+        embed = discord.Embed(title="", color=0xFFFFFF)
+        embed.add_field(name="From:", value="[Bot Author](https://discord.com/users/897656082313383968)", inline=False)
+        embed.add_field(name="Message:", value=message, inline=False)
+        if ctx.author.id == 897656082313383968:
+            for guild in self.bot.guilds:
+                await guild.text_channels[0].send(embed=embed)
+        else:
+            await ctx.send("You don't have access to this command, {}.".format(ctx.author.mention))
+
     async def setup(self, bot):
         await bot.add_cog(MainCogs(bot))
     
