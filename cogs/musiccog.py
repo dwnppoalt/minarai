@@ -161,12 +161,14 @@ class Music(commands.Cog):
         except KeyError:
             pass
 
-    async def __local_check(self, ctx):
+    @staticmethod
+    async def __local_check(ctx):
         if not ctx.guild:
             raise commands.NoPrivateMessage
         return True
 
-    async def __error(self, ctx, error):
+    @staticmethod
+    async def __error(ctx, error):
         if isinstance(error, commands.NoPrivateMessage):
             try:
                 return await ctx.send('This command can not be used in Private Messages.')
