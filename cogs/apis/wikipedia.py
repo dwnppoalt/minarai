@@ -46,7 +46,8 @@ class Wikipedia:
                 "thumbnail" : img
             }
     
-    def dlPDF(self, title):
+    @staticmethod
+    def dlPDF(title):
         ddl = "https://en.wikipedia.org/api/rest_v1/page/pdf/{}".format(title)
         shortener = pyshorteners.Shortener()
         return shortener.tinyurl.short(ddl)

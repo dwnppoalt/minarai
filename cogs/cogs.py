@@ -402,6 +402,7 @@ class MainCogs(commands.Cog):
         else:
             await ctx.send("You don't have access to this command, {}.".format(ctx.author.mention))
 
-    async def setup(self, bot):
+    @staticmethod
+    async def setup(bot):
         await bot.add_cog(MainCogs(bot))
     
