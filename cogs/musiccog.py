@@ -68,7 +68,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
             # take first item from a playlist
             data = data['entries'][0]
 
-        embed = discord.Embed(title="", description=f"Queued [{data['title']}]({data['webpage_url']}), {ctx.author.mention}", color=discord.Color.green())
+        embed = discord.Embed(title="", description=f"Queued **`[{data['title']}]({data['webpage_url']}`**), {ctx.author.mention}", color=discord.Color.green())
         await ctx.send(embed=embed)
 
         if download:
@@ -123,7 +123,7 @@ class MusicPlayer:
             if not isinstance(source, YTDLSource):
                 try:
                     source = await YTDLSource.regather_stream(source, loop=self.bot.loop)
-                except Exception as e:
+                except Exception as e: # skipcq: PYL-W0703 - Loop can sometimes crash.
                     await self._channel.send(f'There was an error processing your song.\n'f'```css\n[{e}]\n```')
                     continue
 

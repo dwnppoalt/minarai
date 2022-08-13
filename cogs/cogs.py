@@ -11,24 +11,14 @@ class HelpDropdown(discord.ui.Select):
     def __init__(self):
         options = [
             discord.SelectOption(
-                label="searchWikiQuery",
-                description="Wikipedia from query",
-                value="searchWikiQuery"
-            ),
-            discord.SelectOption(
-                label="searchWikiID",
-                description="Wikipedia from Page ID",
-                value="searchWikiID"
+                label="wiki",
+                description="Wikipedia",
+                value="wiki",
             ),
             discord.SelectOption(
                 label="whatIs",
                 description="What is...",
                 value="whatIs"
-            ),
-            discord.SelectOption(
-                label="dlWikiPDF",
-                description='Download Wikipedia in PDF',
-                value="dlWikiPDF"
             ),
             discord.SelectOption(
                 label="dictionary",
@@ -50,52 +40,35 @@ class HelpDropdown(discord.ui.Select):
     
     async def callback(self, interaction: discord.Interaction):
         sent = False
-        if self.values[0] == "searchWikiQuery":
-            embed = discord.Embed(title="Wikipedia from query", description="Enter a query to get a Wikipedia article")
-            embed.add_field(name="How to use:", value="Add the query after the command.", inline=False)
-            embed.add_field(name="Example command:", value="`>wikiFromQuery The Hitchhiker's Guide to the Galaxy`", inline=False)
-            embed.add_field(name="Response:", value="The Hitchhiker's Guide to the Galaxy is a comedy science fiction franchise created by Douglas Adams.", inline=False)
-            await interaction.response.edit_message(embed=embed)
-        elif self.values[0] == "searchWikiID":
-            embed = discord.Embed(title="Wikipedia from Page ID", description="Enter a Page ID to get a Wikipedia article")
-            embed.add_field(name="How to use:", value="Add the Page ID after the command.", inline=False)
-            embed.add_field(name="Example", value="`>wikiFromPage 5472903`", inline=False)
-            embed.add_field(name="Response:", value="'Never Gonna Give You Up'is the debut single recorded by English singer and songwriter Rick Astley, released on 27 July 1987.", inline=False)
-            await interaction.response.edit_message(embed=embed)
+        if self.values[0] == "wiki":
+            embed = discord.Embed(title="Wikipedia", description="Search for a topic on Wikipedia", color=discord.Color.blue())
+            embed.add_field(name="Actions: ", value="search: ['search', 's', 'query', 'q']\n download: 'download', 'd', 'dl' \n id :['id', 'i']", inline=False)
+            embed.add_field(name="Example: ", value=">wiki search python", inline=False)
+            embed.add_field(name="Response: ", value="https://en.wikipedia.org/wiki/Python_(programming_language)", inline=False)
+            await interaction.send(embed=embed)
         elif self.values[0] == "whatIs":
             embed = discord.Embed(title="What is...", description="Enter a query to get a Wolfram Alpha answer")
-            embed.add_field(name="How to use:", value="Add the query after the command.", inline=False)
             embed.add_field(name="Example", value="`>whatIs the area of circle`", inline=False)
             embed.add_field(name="Response:", value="The area of a circle is πr^2.", inline=False)
             await interaction.response.edit_message(embed=embed)
-        elif self.values[0] == "dlWikiPDF":
-            embed = discord.Embed(title="Download Wikipedia in PDF", description="Returns a link that redirects you to a direct download link to the Wikipedia article.")
-            embed.add_field(name="How to use:", value="Add the query after the command.", inline=False)
-            embed.add_field(name="Example", value="`>dlWikiPDF The Hitchhiker's Guide to the Galaxy`", inline=False)
-            embed.add_field(name="Response:", value="https://tinyurl.com/xxxxxxxx", inline=False)
-            await interaction.response.edit_message(embed=embed)
         elif self.values[0] == "dictionary":
             embed = discord.Embed(title="Dictionary", description="Enter a query to get a dictionary answer")
-            embed.add_field(name="How to use:", value="Add the query after the command.", inline=False)
             embed.add_field(name="Example", value="`>dictionary apprentice`", inline=False)
             embed.add_field(name="Response:", value="The word 'apprentice' is a noun.", inline=False)
             await interaction.response.edit_message(embed=embed)
         elif self.values[0] == "thesaurus":
             embed = discord.Embed(title="Thesaurus", description="Enter a query to get a thesaurus answer")
-            embed.add_field(name="How to use:", value="Add the query after the command.", inline=False)
             embed.add_field(name="Example", value="`>thesaurus apprentice`", inline=False)
             embed.add_field(name="Response:", value="Synonyms: trainee, learner", inline=False)
             await interaction.response.edit_message(embed=embed)
         elif self.values[0] == "todo":
             embed = discord.Embed(title="Todo", description="Enter a query to get a todo answer")
-            embed.add_field(name="How to use:", value="Add the query after the command.", inline=False)
             embed.add_field(name="Actions: ", value="`add: [add, a, +]\nremove: [remove, rm, r, del, delete]\nclear: [clear, clr, c]`")
             embed.add_field(name="Example", value="`>todo add drink water`", inline=False)
             embed.add_field(name="Response:", value="Added drink water to todo list.", inline=False)
             await interaction.response.edit_message(embed=embed)
         elif self.values[0] == "book":
             embed = discord.Embed(title="Book", description="Enter a query to download a book")
-            embed.add_field(name="How to use:", value="Add the query after the command.", inline=False)
             embed.add_field(name="Actions: ", value="`search: [search, s]\ndownload: [download, dl]`")
             embed.add_field(name="Example", value="`>book search The Hitchhiker's Guide to the Galaxy`", inline=False)
             embed.add_field(name="Response:", value="The Hitchhiker's Guide to the Galaxy is a comedy science fiction franchise created by Douglas Adams.", inline=False)
@@ -123,7 +96,7 @@ class bookPageEngine(discord.ui.View):
         await self.message.edit(view=self)
     
     @discord.ui.button(label="Previous Page", style=discord.ButtonStyle.green, emoji="⬅")
-    async def previous_page(self, button:discord.ui.Button,interaction:discord.Interaction):
+    async def previous_page(self, interaction:discord.Interaction):
         if not self.page - 1 == 0:
             self.page -= 1
             embed = discord.Embed(title="Search results for: {}".format(self.query), color=0xFFFFFF)
@@ -138,7 +111,7 @@ class bookPageEngine(discord.ui.View):
             await interaction.response.send_message('You are on the first page.', ephemeral=True)
     
     @discord.ui.button(label='Next Page', style=discord.ButtonStyle.green, emoji='➡')
-    async def next_page(self, button:discord.ui.Button,interaction:discord.Interaction):
+    async def next_page(self, interaction:discord.Interaction):
         self.page += 1
         if self.page - 1 != len(self.results):
             embed = discord.Embed(title="Search results for: {}".format(self.query), color=0xFFFFFF)
@@ -152,20 +125,19 @@ class bookPageEngine(discord.ui.View):
         else:
             await interaction.response.send_message('You are on the last page.', ephemeral=True)
 class wikiPageEngine(discord.ui.View):
-    def __init__(self, *, timeout=10, results=None, page=None, title=None, type=None):
+    def __init__(self, *, timeout=10, results=None, page=None, title=None):
         super().__init__()
         self.timeout = timeout
         self.results = results
         self.page = page
         self.title = title
-        self.type = type
         
     async def on_timeout(self) -> None:
         for item in self.children:
             item.disabled = True
         await self.message.edit(view=self)
     @discord.ui.button(label="Previous Page", style=discord.ButtonStyle.green, emoji="⬅")
-    async def previous_page(self, button:discord.ui.Button,interaction:discord.Interaction):
+    async def previous_page(self, interaction:discord.Interaction):
         if not self.page - 1 == 0:
             self.page -= 1
             new_embed = discord.Embed(title=self.title, color=0xFFFFFF)
@@ -178,7 +150,7 @@ class wikiPageEngine(discord.ui.View):
     
 
     @discord.ui.button(label='Next Page', style=discord.ButtonStyle.green, emoji='➡')
-    async def next_page(self, button:discord.ui.Button,interaction:discord.Interaction):
+    async def next_page(self,interaction:discord.Interaction):
         self.page += 1
         if self.page - 1 != len(self.results):
             
@@ -201,7 +173,7 @@ class wolframPageEngine(discord.ui.View):
             item.disabled = True
         await self.message.edit(view=self)
     @discord.ui.button(label="Previous Subpod", style=discord.ButtonStyle.green, emoji="⬅")
-    async def previous_page(self, button:discord.ui.Button,interaction:discord.Interaction):
+    async def previous_page(self,interaction:discord.Interaction):
         if not self.page - 1 == 0:
             self.page -= 1
             embed = discord.Embed(title=self.results[self.page - 1].get('dataType'), color=0xFFFFFF)
@@ -212,7 +184,7 @@ class wolframPageEngine(discord.ui.View):
             await interaction.response.send_message('You are on the first subpod.', ephemeral=True)
     
     @discord.ui.button(label='Next Subpod', style=discord.ButtonStyle.green, emoji='➡')
-    async def next_page(self, button:discord.ui.Button,interaction:discord.Interaction):
+    async def next_page(self, interaction:discord.Interaction):
         self.page += 1
         if self.page - 1 != len(self.results):
             embed = discord.Embed(title=self.results[self.page - 1].get('dataType'), color=0xFFFFFF)
@@ -234,7 +206,7 @@ class oxfordPageEngine(discord.ui.View):
             item.disabled = True
         await self.message.edit(view=self)
     @discord.ui.button(label="Previous Result", style=discord.ButtonStyle.green, emoji="⬅")
-    async def previous_page(self, button:discord.ui.Button,interaction:discord.Interaction):
+    async def previous_page(self, interaction:discord.Interaction):
         self.page -= 1
         if self.page - 1 == 0:
             #self.results = entry: {...}
@@ -259,7 +231,7 @@ class oxfordPageEngine(discord.ui.View):
         else:
             await interaction.response.send_message('You are on the first result.', ephemeral=True)
     @discord.ui.button(label='Next Result', style=discord.ButtonStyle.green, emoji='➡')
-    async def next_page(self, button:discord.ui.Button,interaction:discord.Interaction):
+    async def next_page(self,interaction:discord.Interaction):
         self.page += 1
         if self.page - 1 != len(self.results.get("lexicalEntries")):
             embed = discord.Embed(title=self.word, color=0xFFFFFF)
@@ -294,7 +266,7 @@ class MainCogs(commands.Cog):
     async def wiki(self, ctx, action, *, query):
         aliases = {
             "search" : ['search', 's', "query", "q"],
-            "download" : ['download', 'd', "dl"],
+            "download" : ['download', 'd', 'dl'],
             "id" : ['id', 'i']
         }
         if action in aliases.get("search"):
