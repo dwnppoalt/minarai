@@ -68,7 +68,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
             # take first item from a playlist
             data = data['entries'][0]
 
-        embed = discord.Embed(title="", description=f"Queued **`[{data['title']}]({data['webpage_url']}`**), {ctx.author.mention}", color=discord.Color.green())
+        embed = discord.Embed(title="", description=f"Queued **`[{data['title']}]({data['webpage_url']})`**, {ctx.author.mention}", color=discord.Color.green())
         await ctx.send(embed=embed)
 
         if download:

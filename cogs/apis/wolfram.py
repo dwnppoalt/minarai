@@ -1,5 +1,7 @@
 import requests
 import os
+from urllib.parse import quote_plus
+import json
 class Wolfram:
     def __init__(self) -> None:
         self.APP_ID = os.environ["WOLFRAM_APP_ID"]
@@ -12,11 +14,12 @@ class Wolfram:
         return response
     
     def filterResults(self, query: str) -> dict:
-        query = query.replace(" ", "%2B")
+        query = quote_plus(query)
         obj = self.parseContent(query).get("queryresult")
+        with open('wolfram.json', 'w') as f:
+            json.dump(obj, f)
         if obj.get('success') != True:
-            raise Exception("Query failed")
-        
+            return None
         return {
                 "pods" : [
                     {

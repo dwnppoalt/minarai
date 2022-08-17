@@ -96,7 +96,7 @@ class bookPageEngine(discord.ui.View):
         await self.message.edit(view=self)
     
     @discord.ui.button(label="Previous Page", style=discord.ButtonStyle.green, emoji="⬅")
-    async def previous_page(self, interaction:discord.Interaction):
+    async def previous_page(self,button: discord.ui.Button, interaction:discord.Interaction):
         if not self.page - 1 == 0:
             self.page -= 1
             embed = discord.Embed(title="Search results for: {}".format(self.query), color=0xFFFFFF)
@@ -111,7 +111,7 @@ class bookPageEngine(discord.ui.View):
             await interaction.response.send_message('You are on the first page.', ephemeral=True)
     
     @discord.ui.button(label='Next Page', style=discord.ButtonStyle.green, emoji='➡')
-    async def next_page(self, interaction:discord.Interaction):
+    async def next_page(self,button: discord.ui.Button, interaction:discord.Interaction):
         self.page += 1
         if self.page - 1 != len(self.results):
             embed = discord.Embed(title="Search results for: {}".format(self.query), color=0xFFFFFF)
@@ -137,7 +137,7 @@ class wikiPageEngine(discord.ui.View):
             item.disabled = True
         await self.message.edit(view=self)
     @discord.ui.button(label="Previous Page", style=discord.ButtonStyle.green, emoji="⬅")
-    async def previous_page(self, interaction:discord.Interaction):
+    async def previous_page(self,button: discord.ui.Button, interaction:discord.Interaction):
         if not self.page - 1 == 0:
             self.page -= 1
             new_embed = discord.Embed(title=self.title, color=0xFFFFFF)
@@ -150,7 +150,7 @@ class wikiPageEngine(discord.ui.View):
     
 
     @discord.ui.button(label='Next Page', style=discord.ButtonStyle.green, emoji='➡')
-    async def next_page(self,interaction:discord.Interaction):
+    async def next_page(self,button: discord.ui.Button, interaction:discord.Interaction):
         self.page += 1
         if self.page - 1 != len(self.results):
             
@@ -173,7 +173,7 @@ class wolframPageEngine(discord.ui.View):
             item.disabled = True
         await self.message.edit(view=self)
     @discord.ui.button(label="Previous Subpod", style=discord.ButtonStyle.green, emoji="⬅")
-    async def previous_page(self,interaction:discord.Interaction):
+    async def previous_page(self,button: discord.ui.Button, interaction:discord.Interaction):
         if not self.page - 1 == 0:
             self.page -= 1
             embed = discord.Embed(title=self.results[self.page - 1].get('dataType'), color=0xFFFFFF)
@@ -184,7 +184,7 @@ class wolframPageEngine(discord.ui.View):
             await interaction.response.send_message('You are on the first subpod.', ephemeral=True)
     
     @discord.ui.button(label='Next Subpod', style=discord.ButtonStyle.green, emoji='➡')
-    async def next_page(self, interaction:discord.Interaction):
+    async def next_page(self, button: discord.ui.Button, interaction:discord.Interaction):
         self.page += 1
         if self.page - 1 != len(self.results):
             embed = discord.Embed(title=self.results[self.page - 1].get('dataType'), color=0xFFFFFF)
@@ -206,7 +206,7 @@ class oxfordPageEngine(discord.ui.View):
             item.disabled = True
         await self.message.edit(view=self)
     @discord.ui.button(label="Previous Result", style=discord.ButtonStyle.green, emoji="⬅")
-    async def previous_page(self, interaction:discord.Interaction):
+    async def previous_page(self, button: discord.ui.Button, interaction:discord.Interaction):
         self.page -= 1
         if self.page - 1 == 0:
             #self.results = entry: {...}
@@ -231,7 +231,7 @@ class oxfordPageEngine(discord.ui.View):
         else:
             await interaction.response.send_message('You are on the first result.', ephemeral=True)
     @discord.ui.button(label='Next Result', style=discord.ButtonStyle.green, emoji='➡')
-    async def next_page(self,interaction:discord.Interaction):
+    async def next_page(self,button: discord.ui.Button, interaction:discord.Interaction):
         self.page += 1
         if self.page - 1 != len(self.results.get("lexicalEntries")):
             embed = discord.Embed(title=self.word, color=0xFFFFFF)
