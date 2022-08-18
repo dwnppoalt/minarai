@@ -8,7 +8,7 @@ TOKEN = os.environ["TOKEN"]
 activity = discord.Activity(type=discord.ActivityType.listening, name=">help")
 intents = discord.Intents.default()
 intents.message_content = True
-bot = commands.Bot(command_prefix='>', help_command=None, intents=intents, activity=activity, status=discord.Status.online)
+bot = commands.Bot(command_prefix='?', help_command=None, intents=intents, activity=activity, status=discord.Status.online)
 
 @bot.event
 async def on_ready():

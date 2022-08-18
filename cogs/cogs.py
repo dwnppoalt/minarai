@@ -186,11 +186,13 @@ class wolframPageEngine(discord.ui.View):
     @discord.ui.button(label='Next Subpod', style=discord.ButtonStyle.green, emoji='➡')
     async def next_page(self, button: discord.ui.Button, interaction:discord.Interaction):
         self.page += 1
+        
         if self.page - 1 != len(self.results):
             embed = discord.Embed(title=self.results[self.page - 1].get('dataType'), color=0xFFFFFF)
             for i in self.results[self.page - 1].get("subpods"):
                 embed.set_image(url=i.get("img"))
             await interaction.response.edit_message(embed=embed)
+            
         else:
             await interaction.response.send_message('You are on the last subpod.', ephemeral=True)
 
@@ -293,20 +295,18 @@ class MainCogs(commands.Cog):
 
     @commands.command()
     async def whatIs(self, ctx, *, query):
-        self.wolframCalls += 1
-        if self.wolframCalls > 1900:
-            await ctx.send("WARNING: The API free calls is running low. Remaining: {}".format(self.wolframCalls, 2000 - self.wolframCalls))
-        if self.wolframCalls == 2000:
-            await ctx.send("You have exceeded the maximum number of the API free calls using the StudyBot App ID. Switching to `demo` app ID.")
-            self.wolfram.setAppID("demo")
-            
+    
         obj = self.wolfram.filterResults(query=query)
-        pods = obj.get("pods")
-        embed = discord.Embed(title=pods[0].get("dataType"), color=0xFFFFFF)
-        for i in pods[0].get("subpods"):
-            embed.set_image(url=i.get("img"))
-        view = wolframPageEngine(results=pods, page=1)
-        view.message = await ctx.send(view=view, embed=embed)
+        if obj.get("didyoumeans") != []:
+            embed = discord.Embed(title="No results found. Did you mean: ", description="**{}**".format(obj.get("didyoumeans")) if len(obj.get("didyoumeans")) == 1 else "\n\n".join(obj.get("didyoumeans")), color=0xFFFFFF)
+            await ctx.send(embed=embed)
+        else:
+            pods = obj.get("pods")
+            embed = discord.Embed(title=pods[0].get("dataType"), color=0xFFFFFF)
+            for i in pods[0].get("subpods"):
+                embed.set_image(url=i.get("img"))
+            view = wolframPageEngine(results=pods, page=1)
+            view.message = await ctx.send(view=view, embed=embed)
     
 
     @commands.command()
