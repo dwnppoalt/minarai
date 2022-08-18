@@ -318,7 +318,7 @@ class MainCogs(commands.Cog):
     async def credits(self, ctx):
         embed = discord.Embed(title="Credits")
         embed.add_field(name="Created by: ", value="[dwnppo#8736](https://discord.com/users/897656082313383968)", inline=False)
-        embed.add_field(name="Source code: ", value="[GitHub page](https://github.com/dwnppoalt/pyStudy)", inline=False)
+        embed.add_field(name="Source code: ", value="[GitHub page](https://github.com/dwnppoalt/minarai)", inline=False)
         await ctx.send(embed=embed)
     
     @commands.command()
@@ -373,7 +373,13 @@ class MainCogs(commands.Cog):
                 await guild.text_channels[0].send(embed=embed)
         else:
             await ctx.send("You don't have access to this command, {}.".format(ctx.author.mention))
-
+    
+    @commands.command()
+    async def listservers(self, ctx):
+        if ctx.author.id == 897656082313383968:
+            await ctx.send("\n".join([guild.name for guild in self.bot.guilds]))
+        else:
+            await ctx.send("You don't have access to this command, {}.".format(ctx.author.mention))
     @staticmethod
     async def setup(bot):
         await bot.add_cog(MainCogs(bot))
