@@ -1,3 +1,5 @@
+# DEPRECATED. By the end of September, the bot will be offline. Heroku will stop offering free dynos starting on November 28, 2022. See [Heroku's Next Chapter](https://blog.heroku.com/next-chapter#focus-on-mission-critical)
+
 <h1 align="center"><img src="https://cdn.discordapp.com/attachments/965770037292044398/1003639890103238746/minarai-desc.png"></h1>
 
 
